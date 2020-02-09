@@ -110,20 +110,20 @@ fn main() {
              (33 bytes, 1 byte 0x02 (y-coord is even), and 32 bytes corresponding to X coordinate)");
     let pbk_c = PublicKey::from_secret_key(&secret_key, PublicKeyKind::Compressed).serialize();
     let pbk_u = PublicKey::from_secret_key(&secret_key, PublicKeyKind::UnCompressed).serialize();
-    println!("COMRESSED:    {:?}", hex::encode(&pbk_c));
+    println!("COMPRESSED:   {:?}", hex::encode(&pbk_c));
     println!("UNCOMPRESSED: {:?}", hex::encode(&pbk_u));
           
 
     println!("2 - Perform SHA-256 hashing on the public key");
     let pbk_c_sha256 = sha256(pbk_c);
     let pbk_u_sha256 = sha256(pbk_u);
-    println!("COMRESSED:    {:?}", hex::encode(&pbk_c_sha256));
+    println!("COMPRESSED:   {:?}", hex::encode(&pbk_c_sha256));
     println!("UNCOMPRESSED: {:?}", hex::encode(&pbk_u_sha256));
 
     println!("3 - Perform RIPEMD-160 hashing on the result of SHA-256");
     let pbk_c_sha256_ripemd160 = ripemd160(pbk_c_sha256);
     let pbk_u_sha256_ripemd160 = ripemd160(pbk_u_sha256);
-    println!("COMRESSED:    {:?}", hex::encode(&pbk_c_sha256_ripemd160));
+    println!("COMPRESSED:   {:?}", hex::encode(&pbk_c_sha256_ripemd160));
     println!("UNCOMPRESSED: {:?}", hex::encode(&pbk_u_sha256_ripemd160));
 
     println!("4 - Add version byte in front of RIPEMD-160 hash (0x00 for Main Network)");
@@ -131,7 +131,7 @@ fn main() {
     let mut pbk_u_sha256_ripemd160_mn = pbk_u_sha256_ripemd160.to_vec();
     pbk_c_sha256_ripemd160_mn.insert(0, 0x00);
     pbk_u_sha256_ripemd160_mn.insert(0, 0x00);
-    println!("COMRESSED:    {:?}", hex::encode(&pbk_c_sha256_ripemd160_mn));
+    println!("COMPRESSED:   {:?}", hex::encode(&pbk_c_sha256_ripemd160_mn));
     println!("UNCOMPRESSED: {:?}", hex::encode(&pbk_u_sha256_ripemd160_mn));
 
     println!("\n(note that below steps are the Base58Check encoding, which has multiple library options available implementing it)\n");
@@ -139,19 +139,19 @@ fn main() {
     println!("5 - Perform SHA-256 hash on the extended RIPEMD-160 result");
     let pbk_c_sha256_ripemd160_mn_sha256 = sha256(pbk_c_sha256_ripemd160_mn.to_vec());
     let pbk_u_sha256_ripemd160_mn_sha256 = sha256(pbk_u_sha256_ripemd160_mn.to_vec());
-    println!("COMRESSED:    {:?}", hex::encode(&pbk_c_sha256_ripemd160_mn_sha256));
+    println!("COMPRESSED:   {:?}", hex::encode(&pbk_c_sha256_ripemd160_mn_sha256));
     println!("UNCOMPRESSED: {:?}", hex::encode(&pbk_u_sha256_ripemd160_mn_sha256));
 
     println!("6 - Perform SHA-256 hash on the result of the previous SHA-256 hash");
     let pbk_c_sha256_ripemd160_mn_sha256_sha256 = sha256(pbk_c_sha256_ripemd160_mn_sha256);
     let pbk_u_sha256_ripemd160_mn_sha256_sha256 = sha256(pbk_u_sha256_ripemd160_mn_sha256);
-    println!("COMRESSED:    {:?}", hex::encode(&pbk_c_sha256_ripemd160_mn_sha256_sha256));
+    println!("COMPRESSED:   {:?}", hex::encode(&pbk_c_sha256_ripemd160_mn_sha256_sha256));
     println!("UNCOMPRESSED: {:?}", hex::encode(&pbk_u_sha256_ripemd160_mn_sha256_sha256));
 
     println!("7 - Take the first 4 bytes of the second SHA-256 hash. This is the address checksum");
     let pbk_c_sha256_ripemd160_mn_sha256_sha256_checksum = &pbk_c_sha256_ripemd160_mn_sha256_sha256[0..4];
     let pbk_u_sha256_ripemd160_mn_sha256_sha256_checksum = &pbk_u_sha256_ripemd160_mn_sha256_sha256[0..4];
-    println!("COMRESSED:    {:?}", hex::encode(&pbk_c_sha256_ripemd160_mn_sha256_sha256_checksum));
+    println!("COMPRESSED:   {:?}", hex::encode(&pbk_c_sha256_ripemd160_mn_sha256_sha256_checksum));
     println!("UNCOMPRESSED: {:?}", hex::encode(&pbk_u_sha256_ripemd160_mn_sha256_sha256_checksum));
 
     println!("8 - Add the 4 checksum bytes from stage 7 at the end of extended RIPEMD-160 hash from stage 4. This is the 25-byte binary Bitcoin Address.");
@@ -159,13 +159,13 @@ fn main() {
     let mut pbk_u_sha256_ripemd160_mn_extended = pbk_u_sha256_ripemd160_mn.to_vec();
     pbk_c_sha256_ripemd160_mn_extended.extend(pbk_c_sha256_ripemd160_mn_sha256_sha256_checksum);
     pbk_u_sha256_ripemd160_mn_extended.extend(pbk_u_sha256_ripemd160_mn_sha256_sha256_checksum);
-    println!("COMRESSED:    {:?}", hex::encode(&pbk_c_sha256_ripemd160_mn_extended));
+    println!("COMPRESSED:   {:?}", hex::encode(&pbk_c_sha256_ripemd160_mn_extended));
     println!("UNCOMPRESSED: {:?}", hex::encode(&pbk_u_sha256_ripemd160_mn_extended));
 
     println!("9 - Convert the result from a byte string into a base58 string using Base58Check encoding. This is the most commonly used Bitcoin Address format");
     let pbk_c_sha256_ripemd160_mn_extended_base58 = pbk_c_sha256_ripemd160_mn_extended.to_base58();
     let pbk_u_sha256_ripemd160_mn_extended_base58 = pbk_u_sha256_ripemd160_mn_extended.to_base58();
-    println!("COMRESSED:    {:?}", pbk_c_sha256_ripemd160_mn_extended_base58);
+    println!("COMPRESSED:   {:?}", pbk_c_sha256_ripemd160_mn_extended_base58);
     println!("UNCOMPRESSED: {:?}", pbk_u_sha256_ripemd160_mn_extended_base58);
 }
 
