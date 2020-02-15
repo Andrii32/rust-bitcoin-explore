@@ -11,7 +11,7 @@ Added example for generating address from uncompressed puplic key.
 
 #### Output
     
-    Technical background of version 1 Bitcoin addresses
+    TECHNICAL BACKGROUND OF VERSION 1 BITCOIN ADDRESSES
 
     0 - Having a private ECDSA key
     "18e14a7b6a307f426a94f8114701e7c8e774e7f9a47e2c2035db29a206321725"
@@ -45,3 +45,51 @@ Added example for generating address from uncompressed puplic key.
     9 - Convert the result from a byte string into a base58 string using Base58Check encoding. This is the most commonly used Bitcoin Address format
     COMPRESSED:   "1PMycacnJaSqwwJqjawXBErnLsZ7RkXUAs"
     UNCOMPRESSED: "16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM"
+
+    WALLET IMPORT FORMAT
+
+    Private key to WIF
+
+    1 - Take a private key
+    "0c28fca386c7a227600b2fe50b7cae11ec86d3bf1fbe471be89827e19d72aa1d"
+    2 - Add a 0x80 byte in front of it for mainnet addresses or 0xef for testnet addresses. Also add a 0x01 byte at the end if the private key will correspond to a compressed public key
+    "800c28fca386c7a227600b2fe50b7cae11ec86d3bf1fbe471be89827e19d72aa1d"
+    3 - Perform SHA-256 hash on the extended key
+    "8147786c4d15106333bf278d71dadaf1079ef2d2440a4dde37d747ded5403592"
+    4 - Perform SHA-256 hash on result of SHA-256 hash
+    "507a5b8dfed0fc6fe8801743720cedec06aa5c6fca72b07c49964492fb98a714"
+    5 - Take the first 4 bytes of the second SHA-256 hash, this is the checksum
+    "507a5b8d"
+    6 - Add the 4 checksum bytes from point 5 at the end of the extended key from point 2
+    "800c28fca386c7a227600b2fe50b7cae11ec86d3bf1fbe471be89827e19d72aa1d507a5b8d"
+    7 - Convert the result from a byte string into a base58 string using Base58Check encoding. This is the Wallet Import Format
+    "5HueCGU8rMjxEXxiPuD5BDku4MkFqeZyd4dZ1jvhTVqvbTLvyTJ"
+
+    WIF to private key
+
+    1 - Take a Wallet Import Format string
+    "5HueCGU8rMjxEXxiPuD5BDku4MkFqeZyd4dZ1jvhTVqvbTLvyTJ"
+    2 - Convert it to a byte string using Base58Check encoding
+    "800c28fca386c7a227600b2fe50b7cae11ec86d3bf1fbe471be89827e19d72aa1d507a5b8d"
+    3 - Drop the last 4 checksum bytes from the byte string
+    "800c28fca386c7a227600b2fe50b7cae11ec86d3bf1fbe471be89827e19d72aa1d"
+    4 - Drop the first byte (it should be 0x80). If the private key corresponded to a compressed public key, also drop the last byte (it should be 0x01). If it corresponded to a compressed public key, the WIF string will have started with K or L instead of 5 (or c instead of 9 on testnet). This is the private key.
+    "0c28fca386c7a227600b2fe50b7cae11ec86d3bf1fbe471be89827e19d72aa1d"
+
+    WIF checksum checking
+
+    1 - Take a Wallet Import Format string
+    "5HueCGU8rMjxEXxiPuD5BDku4MkFqeZyd4dZ1jvhTVqvbTLvyTJ"
+    2 - Convert it to a byte string using Base58Check encoding
+    "800c28fca386c7a227600b2fe50b7cae11ec86d3bf1fbe471be89827e19d72aa1d507a5b8d"
+    3 - Drop the last 4 checksum bytes from the byte string
+    "800c28fca386c7a227600b2fe50b7cae11ec86d3bf1fbe471be89827e19d72aa1d"
+    4 - Perform SHA-256 hash on the shortened string
+    "8147786c4d15106333bf278d71dadaf1079ef2d2440a4dde37d747ded5403592"
+    5 - Perform SHA-256 hash on result of SHA-256 hash
+    "507a5b8dfed0fc6fe8801743720cedec06aa5c6fca72b07c49964492fb98a714"
+    6 - Take the first 4 bytes of the second SHA-256 hash, this is the checksum
+    "507a5b8d"
+    7 - Make sure it is the same, as the last 4 bytes from point 2
+    "507a5b8d"
+    8 - If they are, and the byte string from point 2 starts with 0x80 (0xef for testnet addresses), then there is no error.
