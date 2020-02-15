@@ -26,8 +26,8 @@ fn main() {
     
     println!("1 - Take the corresponding public key generated with it \
              (33 bytes, 1 byte 0x02 (y-coord is even), and 32 bytes corresponding to X coordinate)");
-    let pbk_c = PublicKey::from_secret_key(&secret_key, PublicKeyKind::Compressed).serialize();
-    let pbk_u = PublicKey::from_secret_key(&secret_key, PublicKeyKind::UnCompressed).serialize();
+    let pbk_c = PublicKey::from_secret_key(&secret_key, PublicKeyKind::Compressed).to_bytes();
+    let pbk_u = PublicKey::from_secret_key(&secret_key, PublicKeyKind::UnCompressed).to_bytes();
     println!("COMPRESSED:   {:?}", hex::encode(&pbk_c));
     println!("UNCOMPRESSED: {:?}", hex::encode(&pbk_u));
           

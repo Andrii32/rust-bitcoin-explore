@@ -21,11 +21,15 @@ impl PublicKey{
         }
     }
         
-    pub fn serialize(&self) -> Vec<u8> {
+    pub fn to_bytes(&self) -> Vec<u8> {
         match self.kind{
             PublicKeyKind::Compressed   => self.key.serialize().to_vec(),
             PublicKeyKind::UnCompressed => self.key.serialize_uncompressed().to_vec()
         } 
+    }
+
+    pub fn to_hex(&self) -> String{
+        hex::encode(self.to_bytes())
     }
 
 }
