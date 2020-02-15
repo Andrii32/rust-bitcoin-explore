@@ -1,99 +1,17 @@
-use hex;
-use secp256k1::{self, Secp256k1};
-use digest::Digest;
-use sha2::{Sha256};
-use ripemd160::{Ripemd160};
 use rust_base58::{ToBase58};
 
+mod crypto;
+use crypto::{ripemd160, sha256};
 
-#[derive(Debug)]
-enum Error{
-    FromHexError(hex::FromHexError),
-    InvalidSecretKey,
-    UndefinedError(secp256k1::Error)
-}
+mod secret;
+use secret::{SecretKey};
 
-impl From<hex::FromHexError> for Error {
-    fn from(err: hex::FromHexError) -> Error {
-        Error::FromHexError(err)
-    }
-}
+mod public;
+use public::{PublicKey, PublicKeyKind};
 
-impl From<secp256k1::Error> for Error {
-    fn from(err: secp256k1::Error) -> Error {
-        match err {
-            secp256k1::Error::InvalidSecretKey => Error::InvalidSecretKey,
-            _                                  => Error::UndefinedError(err)
-        }
-    }
-}
+mod errors;
+use errors::{Error};
 
-
-pub struct SecretKey {
-    pub key: secp256k1::SecretKey,
-}
-
-impl SecretKey {
-
-    fn from_hex(hex: String) -> Result<SecretKey, Error>{
-        let mut bytes = [0u8; 32];
-        hex::decode_to_slice(hex, &mut bytes as &mut [u8])?;
-        SecretKey::from_slice(&bytes)
-    }
-
-    fn from_slice(&bytes: &[u8; 32]) -> Result<SecretKey, Error>{
-        let key = secp256k1::SecretKey::from_slice(&bytes)?;
-        Ok(SecretKey{ key: key })
-    }
-
-    fn to_bytes(&self) -> Vec<u8> {
-        self.key[..].to_vec()
-    }
-
-    fn to_hex(&self) -> String{
-        hex::encode(self.to_bytes())
-    }
-
-}
-
-enum PublicKeyKind{
-    Compressed,
-    UnCompressed
-}
-
-pub struct PublicKey{
-    kind: PublicKeyKind,
-    key:  secp256k1::PublicKey
-}
-
-impl PublicKey{
-
-    fn from_secret_key(key: &SecretKey, kind: PublicKeyKind) -> PublicKey{
-        PublicKey{
-            kind: kind, key: secp256k1::PublicKey::from_secret_key(&Secp256k1::new(), &key.key)
-        }
-    }
-        
-    fn serialize(&self) -> Vec<u8> {
-        match self.kind{
-            PublicKeyKind::Compressed   => self.key.serialize().to_vec(),
-            PublicKeyKind::UnCompressed => self.key.serialize_uncompressed().to_vec()
-        } 
-    }
-
-}
-
-fn sha256(key: Vec<u8>) -> Vec<u8>{
-    let mut hasher = Sha256::new();     // create a Sha256 object
-    hasher.input(key);                  // write input message
-    hasher.result().to_vec()            // read hash digest and consume hasher
-}
-
-fn ripemd160(key: Vec<u8>) -> Vec<u8>{
-    let mut hasher = Ripemd160::new();  // create a RIPEMD-160 hasher instance
-    hasher.input(key);                  // process input message
-    hasher.result().to_vec()            // acquire hash digest in the form of GenericArray, which in this case is equivalent to [u8; 20]
-}
 
 fn main() {
     // Technical background of version 1 Bitcoin addresses  
